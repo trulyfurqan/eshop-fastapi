@@ -34,6 +34,11 @@ import secrets
 from config import get_settings
 SITE_URL = get_settings().SITE_URL
 
+# rate limiting
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 
 app = FastAPI(title="E-commerce API", version="0.1.1",
               description=" E-commerce API created with FastAPI and jwt Authenticated")
@@ -43,6 +48,14 @@ oauth_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # static file setup config
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+# Create a Limiter instance
+limiter = Limiter(key_func=lambda request: request.headers.get('User-Agent'))
+
+# Add this middleware to your app to handle rate limit exceeded errors
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 @app.post("/token", tags=["User"])
@@ -263,6 +276,7 @@ async def upload_product_image(
 
 
 @app.post("/products/", tags=["Product"], response_model=product_pydantic)
+@limiter.limit("1000/hour")
 async def add_new_product(product: product_pydanticIn,
                           user: user_pydantic = Depends(get_current_user)):
     product = product.dict(exclude_unset=True)
