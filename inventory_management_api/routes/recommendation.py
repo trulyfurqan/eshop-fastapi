@@ -1,5 +1,5 @@
 from collections import defaultdict
-from db import execute_query, get_shards, get_shard
+from db import execute_query, get_shards
 
 
 class RecommendationEngine:

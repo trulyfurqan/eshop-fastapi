@@ -3,6 +3,7 @@ import mysql.connector
 from cache import get_cache
 from db import get_shards, get_shard, execute_query
 from rate_limiter import limiter
+from recommendation import recommendation_engine
 
 
 class InventoryRoutes:
@@ -111,6 +112,18 @@ class InventoryRoutes:
         except mysql.connector.Error as err:
             return jsonify({"error": str(err)}), 500
 
+    def get_recommendations(self):
+        try:
+            user_id = request.args.get("user_id")
+            num_recommendations = int(request.args.get("num_recommendations", 5))
+
+            recommendations = recommendation_engine.get_recommendations(
+                user_id, num_recommendations
+            )
+            return jsonify({"recommendations": recommendations})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
 
 inventory_routes = InventoryRoutes()
 
@@ -120,3 +133,6 @@ inventory_bp.route("/", methods=["GET"])(inventory_routes.get_inventory)
 inventory_bp.route("/add", methods=["POST"])(inventory_routes.add_inventory)
 inventory_bp.route("/update", methods=["POST"])(inventory_routes.update_inventory)
 inventory_bp.route("/delete", methods=["POST"])(inventory_routes.delete_inventory)
+inventory_bp.route("/recommendations", methods=["GET"])(
+    inventory_routes.get_recommendations
+)
