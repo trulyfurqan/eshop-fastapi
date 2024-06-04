@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from cache import get_cache
 from db import get_shards, get_shard, execute_query
 from rate_limiter import limiter
+from recommendation import recommendation_engine
 
 inventory_bp = Blueprint("inventory", __name__)
 shards = get_shards()
@@ -119,3 +120,18 @@ def delete_inventory():
         return jsonify({"message": "Inventory deleted successfully"}), 200
     except mysql.connector.Error as err:
         return jsonify({"error": str(err)}), 500
+
+
+@inventory_bp.route("/recommendations", methods=["GET"])
+@limiter.limit("10 per minute")
+def get_recommendations():
+    try:
+        user_id = request.args.get("user_id")
+        num_recommendations = int(request.args.get("num_recommendations", 5))
+
+        recommendations = recommendation_engine.get_recommendations(
+            user_id, num_recommendations
+        )
+        return jsonify({"recommendations": recommendations})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
