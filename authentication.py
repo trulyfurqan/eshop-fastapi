@@ -90,3 +90,8 @@ async def token_generator(username: str, password: str):
     }
     token = jwt.encode(token_data, get_settings().SECRET, algorithm="HS256")
     return token
+
+
+
+async def get_current_user(token: str = Depends(oauth_scheme)):
+    return await very_token(token)

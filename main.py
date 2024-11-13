@@ -35,6 +35,11 @@ from config import get_settings
 SITE_URL = get_settings().SITE_URL
 
 
+# add cart
+from routes import cart
+app.include_router(cart.router, prefix="/api", tags=["Cart"])
+
+
 app = FastAPI(title="E-commerce API", version="0.1.1",
               description=" E-commerce API created with FastAPI and jwt Authenticated")
 
