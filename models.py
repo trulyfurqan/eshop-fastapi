@@ -75,8 +75,3 @@ class CartItem(Model):
 
 
 
-class Wishlist(Model):
-    id = fields.IntField(pk=True, index=True)
-    user = fields.ForeignKeyField("models.User", related_name="wishlist")
-    product = fields.ForeignKeyField("models.Product", related_name="wishlists")
-    created_at = fields.DatetimeField(default=datetime.utcnow)
