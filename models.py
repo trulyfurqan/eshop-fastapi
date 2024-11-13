@@ -71,3 +71,12 @@ class CartItem(Model):
     product = fields.ForeignKeyField("models.Product", related_name="cart_items")
     quantity = fields.IntField(default=1)
     price = fields.DecimalField(max_digits=10, decimal_places=2)
+
+
+
+
+class Wishlist(Model):
+    id = fields.IntField(pk=True, index=True)
+    user = fields.ForeignKeyField("models.User", related_name="wishlist")
+    product = fields.ForeignKeyField("models.Product", related_name="wishlists")
+    created_at = fields.DatetimeField(default=datetime.utcnow)
